@@ -47,7 +47,7 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 install(
-  DIRECTORY config include src launch srv log
+  DIRECTORY config include src launch srv log # launch 파일이 실제 패키지에 없어서 빌드 에러가 발생해요! launch 폴더 만들면 상관없긴한데..
   DESTINATION share/${PROJECT_NAME}
 )
 
