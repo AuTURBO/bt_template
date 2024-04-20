@@ -8,7 +8,7 @@
 > `.run` 파일을 설치 후 권한을 부여 후 실행
 > 
 
-[](https://s3.us-west-1.amazonaws.com/download.behaviortree.dev/groot2_linux_installer/Groot2-v1.5.2-linux-installer.run)
+[groot install link](https://s3.us-west-1.amazonaws.com/download.behaviortree.dev/groot2_linux_installer/Groot2-v1.5.2-linux-installer.run)
 
 ```bash
 cd ~/Downloads
