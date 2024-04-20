@@ -3,11 +3,7 @@
 ![1](./fig/1.png)
 ## Behavior Tree Setting
 
----
-
 ### Groot 2 Install
-
----
 
 > `.run` 파일을 설치 후 권한을 부여 후 실행
 > 
@@ -22,7 +18,6 @@ sudo chmod 777 Groot2-v1.5.2-linux-installer.run
 
 ### Groot 2 Launch
 
----
 
 ```bash
 cd ~/Groot2/bin ; ./groot2
@@ -37,7 +32,6 @@ echo "alias groot='cd ~/Groot2/bin ; ./groot2'" >> ~/.bashrc
 
 ### Behavior Tree Install & Build ( Version 4.5 )
 
----
 
 > Behavior Tree Install
 > 
@@ -76,8 +70,6 @@ colcon build
 ```
 
 ## BehaviorTree Sample PKG Launch
-
----
 
 ### Groot2 Launch
 
