@@ -32,9 +32,11 @@ using namespace BT;
 // 비동기적 구현이 가능하여, 로봇이 동작하는 동안 로봇의 상태를 체크하고, 이에 따라 다른 노드를 실행하거나 중지하는
 // 노드를 구현할 때 사용될 수 있다.
 
-class TopicDetected : public BT::StatefulActionNode, public rclcpp::Node
+class TopicDetected : public BT::StatefulActionNode //, public rclcpp::Node
 {
   private:
+    // ROS 2 노드 객체
+    rclcpp::Node::SharedPtr node_ptr_;
     // ROS 2 구독자 및 발행자 객체
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr subscription_;
     rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr publisher_;
@@ -59,31 +61,36 @@ class TopicDetected : public BT::StatefulActionNode, public rclcpp::Node
 
   public:
     // 생성자: Behavior Tree 노드와 ROS 2 노드를 초기화
-    TopicDetected(const std::string &name, const NodeConfiguration &config)
-        : BT::StatefulActionNode(name, config), Node("topic_detected_node")
+    TopicDetected(const std::string &name, const NodeConfiguration &config, rclcpp::Node::SharedPtr node_ptr)
+        : BT::StatefulActionNode(name, config), node_ptr_{node_ptr}
     {
-        subscription_ = this->create_subscription<std_msgs::msg::Int32>(
-            "/toto", 10, std::bind(&TopicDetected::topic_callback, this, _1));
-        publisher_ = this->create_publisher<std_msgs::msg::Int32>("/camera/detected", 10);
+        subscription_ = node_ptr_->create_subscription<std_msgs::msg::Int32>(
+            "/topic", 10, std::bind(&TopicDetected::topic_callback, this, _1));
+        publisher_ = node_ptr_->create_publisher<std_msgs::msg::Int32>("/camera/detected", 10);
     }
 
     // 해당 노드의 초기화 함수
     NodeStatus onStart() override
     {
+
+        if (!node_ptr_)
+        {
+            std::cout << "ROS2 node not registered via init() method" << std::endl;
+            return BT::NodeStatus::FAILURE;
+        }
+
         // 메시지가 감지되었는지 여부에 따라 Behavior Tree의 실행 결과를 반환
         flag = true;
         detected = false;
         std::string msg;
         getInput<std::string>("message", msg);
-        RCLCPP_INFO(this->get_logger(), "message: ", msg);
+        //       RCLCPP_INFO(node_ptr_->get_logger(), "message: ", msg);
         return NodeStatus::RUNNING;
     }
 
     // 해당 노드의 실행 함수
     NodeStatus onRunning() override
     {
-        // 메시지 큐에잇는 모든 메시지를 처리
-        rclcpp::spin_some(this->get_node_base_interface());
         if (detected == true)
         {
             detected = false;
@@ -95,7 +102,7 @@ class TopicDetected : public BT::StatefulActionNode, public rclcpp::Node
     // 해당 노드가 다른 노드에 의해 중지되었을 때 호출되는 함수
     void onHalted() override
     {
-        RCLCPP_ERROR(this->get_logger(), "Halted");
+        RCLCPP_ERROR(node_ptr_->get_logger(), "Halted");
     }
 
     // Behavior Tree 노드에서 사용할 수 있는 포트 목록을 제공

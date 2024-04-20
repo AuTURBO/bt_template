@@ -27,7 +27,7 @@ const std::string default_bt_xml_file =
 
 // logger 파일 경로 설정
 const std::string default_bt_log_file =
-    ament_index_cpp::get_package_share_directory("bt_sample") + "/log/bt_sample_trace.btlog";
+    ament_index_cpp::get_package_share_directory("bt_sample") + "/log/bt_trace.btlog";
 
 class BTNode : public rclcpp::Node
 {
@@ -48,19 +48,20 @@ class BTNode : public rclcpp::Node
         // Behavior Tree 실행 주기 설정
         const auto timer_period = 500ms;
         timer_ = this->create_wall_timer(timer_period, std::bind(&BTNode::update_behavior_tree, this));
-
-        rclcpp::spin(shared_from_this());
-        rclcpp::shutdown();
+        RCLCPP_INFO(this->get_logger(), "Before spinning node");
+        // 수정한 부분
+        // rclcpp::spin(shared_from_this());
+        // rclcpp::shutdown();
     }
     void create_behavior_tree()
     {
         // xml 파일에서 Behavior Tree 로드
         BT::BehaviorTreeFactory factory;
-        factory.registerNodeType<TopicDetected>("TopicDetected");
+        factory.registerNodeType<TopicDetected>("TopicDetected", shared_from_this());
 
         // callback 함수 활성화를 위해 노드 설정
-        BT::NodeConfiguration con = {};
-        auto lc_topic_detected_state = std::make_shared<TopicDetected>("lc_topic_detected_state", con);
+        // BT::NodeConfiguration con = {};
+        // auto lc_topic_detected_state = std::make_shared<TopicDetected>("lc_topic_detected_state", con);
 
         auto blackboard = BT::Blackboard::create();
         // blackboard->set<std::string>("location_file", location_file_);
@@ -112,6 +113,13 @@ int main(int argc, char **argv)
     rclcpp::init(argc, argv);
     auto node = std::make_shared<BTNode>();
     node->execute();
+    // ros ok 이거나 behavior tree의 root node가 running 상태일 때까지 노드를 spin
+    while (rclcpp::ok() && node->tree_.tickOnce() == BT::NodeStatus::RUNNING)
+    {
+        rclcpp::spin_some(node);
+    }
+    RCLCPP_INFO(node->get_logger(), "Shutting down.");
     rclcpp::shutdown();
+
     return 0;
 }
