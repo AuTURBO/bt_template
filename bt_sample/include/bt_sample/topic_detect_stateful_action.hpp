@@ -1,22 +1,22 @@
-#include "std_msgs/msg/int32.hpp"
-#include <rclcpp/executors.hpp>
-#include <rclcpp/rclcpp.hpp>
-
-#include <behaviortree_cpp/basic_types.h>
-#include <behaviortree_cpp/bt_factory.h>
-#include <behaviortree_cpp/tree_node.h>
-
+// Standard headers
 #include <chrono>
 #include <cmath>
 #include <iostream>
 #include <memory>
 #include <string>
 
-using namespace std::chrono_literals;
-using std::chrono::milliseconds;
-using std::placeholders::_1;
+// ROS2 headers
+#include <rclcpp/executors.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/int32.hpp>
 
-using namespace BT;
+// BehaviorTree.CPP headers
+#include <behaviortree_cpp/basic_types.h>
+#include <behaviortree_cpp/bt_factory.h>
+#include <behaviortree_cpp/tree_node.h>
+
+using namespace std::chrono_literals;
+using std::placeholders::_1;
 
 // BehaviorTree.CPP에서 사용되는 네임스페이스와 타입 정의
 
@@ -34,7 +34,7 @@ using namespace BT;
 
 class TopicDetected : public BT::StatefulActionNode //, public rclcpp::Node
 {
-  private:
+private:
     // ROS 2 노드 객체
     rclcpp::Node::SharedPtr node_ptr_;
     // ROS 2 구독자 및 발행자 객체
@@ -59,10 +59,11 @@ class TopicDetected : public BT::StatefulActionNode //, public rclcpp::Node
         }
     }
 
-  public:
+public:
     // 생성자: Behavior Tree 노드와 ROS 2 노드를 초기화
-    TopicDetected(const std::string &name, const NodeConfiguration &config, rclcpp::Node::SharedPtr node_ptr)
-        : BT::StatefulActionNode(name, config), node_ptr_{node_ptr}
+    TopicDetected(const std::string &name, const BT::NodeConfiguration &config, rclcpp::Node::SharedPtr node_ptr)
+        : BT::StatefulActionNode(name, config)
+        , node_ptr_{ node_ptr }
     {
         subscription_ = node_ptr_->create_subscription<std_msgs::msg::Int32>(
             "/topic", 10, std::bind(&TopicDetected::topic_callback, this, _1));
@@ -70,7 +71,7 @@ class TopicDetected : public BT::StatefulActionNode //, public rclcpp::Node
     }
 
     // 해당 노드의 초기화 함수
-    NodeStatus onStart() override
+    BT::NodeStatus onStart() override
     {
 
         if (!node_ptr_)
@@ -85,18 +86,18 @@ class TopicDetected : public BT::StatefulActionNode //, public rclcpp::Node
         std::string msg;
         getInput<std::string>("message", msg);
         //       RCLCPP_INFO(node_ptr_->get_logger(), "message: ", msg);
-        return NodeStatus::RUNNING;
+        return BT::NodeStatus::RUNNING;
     }
 
     // 해당 노드의 실행 함수
-    NodeStatus onRunning() override
+    BT::NodeStatus onRunning() override
     {
         if (detected == true)
         {
             detected = false;
-            return NodeStatus::SUCCESS;
+            return BT::NodeStatus::SUCCESS;
         }
-        return NodeStatus::RUNNING;
+        return BT::NodeStatus::RUNNING;
     }
 
     // 해당 노드가 다른 노드에 의해 중지되었을 때 호출되는 함수
@@ -106,9 +107,9 @@ class TopicDetected : public BT::StatefulActionNode //, public rclcpp::Node
     }
 
     // Behavior Tree 노드에서 사용할 수 있는 포트 목록을 제공
-    static PortsList providedPorts()
+    static BT::PortsList providedPorts()
     {
         const char *description = "Simply print the target on console...";
-        return {InputPort<std::string>("message")}; // 이 예제에서는 string 타입의 입력 포트를 제공
+        return { BT::InputPort<std::string>("message") }; // 이 예제에서는 string 타입의 입력 포트를 제공
     }
 };
