@@ -9,30 +9,28 @@ endif()
 # find dependencies
 ######################################################
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED )
-find_package(rclcpp_action REQUIRED )
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(behaviortree_cpp REQUIRED )
 find_package(rosidl_default_generators REQUIRED)
 
-find_package(ament_cmake_auto REQUIRED)
-ament_auto_find_build_dependencies()
+include(cmake/external/behaviortree_cpp.cmake)
 
 ######################################################
 # add executables
 ######################################################
-
-add_executable(${PROJECT_NAME})
-target_sources(${PROJECT_NAME}
+add_executable(bt_node)
+target_sources(bt_node
     PRIVATE src/bt_node.cpp)
-target_include_directories(${PROJECT_NAME}
+target_include_directories(bt_node
     PRIVATE include)
-ament_target_dependencies(${PROJECT_NAME}
-    rclcpp
-    rclcpp_action
-    std_msgs
-    behaviortree_cpp
-    ament_index_cpp)
+target_link_libraries(bt_node
+    PRIVATE behaviortree_cpp)
+ament_target_dependencies(bt_node
+    PUBLIC  rclcpp
+            rclcpp_action
+            std_msgs
+            ament_index_cpp)
 
 ######################################################
 # test
@@ -47,7 +45,7 @@ endif()
 ######################################################
 # install
 ######################################################
-install(TARGETS ${PROJECT_NAME}
+install(TARGETS bt_node
         DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY config include src srv log
         DESTINATION share/${PROJECT_NAME})
