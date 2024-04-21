@@ -64,7 +64,7 @@ echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> ~/.bashrc
 
 ```bash
 cd ~/ros2_ws/src
-git clone https://github.com/AuTURBO/bt_tamplate.git
+git clone https://github.com/AuTURBO/bt_template.git
 cd ~/ros2_ws 
 colcon build
 ```
