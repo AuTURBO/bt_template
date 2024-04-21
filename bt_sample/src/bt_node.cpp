@@ -1,38 +1,37 @@
-#include <filesystem>
-
-#include "ament_index_cpp/get_package_share_directory.hpp"
-#include "rclcpp/rclcpp.hpp"
+// Standard headers
 #include <chrono>
+#include <filesystem>
 #include <random>
 #include <string>
 
-#include "behaviortree_cpp/loggers/bt_cout_logger.h"
-#include "behaviortree_cpp/loggers/bt_file_logger_v2.h"
-#include "behaviortree_cpp/loggers/groot2_publisher.h"
-#include "behaviortree_cpp/xml_parsing.h"
-// #include "bt_sample/topic_detect_sync_action.hpp"
-#include "bt_sample/topic_detect_stateful_action.hpp"
+// ROS2 headers
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <rclcpp/rclcpp.hpp>
 
-// 시간 측정을 위한 헤더 파일
+// BehaviorTree.CPP headers
+#include <behaviortree_cpp/loggers/bt_cout_logger.h>
+#include <behaviortree_cpp/loggers/bt_file_logger_v2.h>
+#include <behaviortree_cpp/loggers/groot2_publisher.h>
+#include <behaviortree_cpp/xml_parsing.h>
+
+// Project headers
+#include "bt_sample/topic_detect_stateful_action.hpp"
+// #include "bt_sample/topic_detect_sync_action.hpp"
+
 using namespace std::chrono_literals;
-using std::chrono::milliseconds;
-using std::placeholders::_1;
 
 // Behavior Tree 실행을 제어하기 위한 전역 atomic 변수 정의
-std::atomic_bool switchActive{true};
+std::atomic_bool switchActive{ true };
 
-// tree xml 파일 경로 설정
-const std::string default_bt_xml_file =
-    ament_index_cpp::get_package_share_directory("bt_sample") + "/config/main_bt.xml";
-
-// logger 파일 경로 설정
-const std::string default_bt_log_file =
-    ament_index_cpp::get_package_share_directory("bt_sample") + "/log/bt_trace.btlog";
+// 파일 경로 설정
+const std::string default_bt_xml_file = ament_index_cpp::get_package_share_directory("bt_sample") + "/config/main_bt.xml";
+const std::string default_bt_log_file = ament_index_cpp::get_package_share_directory("bt_sample") + "/log/bt_trace.btlog";
 
 class BTNode : public rclcpp::Node
 {
-  public:
-    BTNode() : Node("bt_node")
+public:
+    BTNode()
+        : Node("bt_node")
     {
         this->declare_parameter<std::string>("tree_xml_file", default_bt_xml_file);
         tree_xml_file_ = this->get_parameter("tree_xml_file").as_string();
@@ -90,13 +89,15 @@ class BTNode : public rclcpp::Node
 int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
+
     auto node = std::make_shared<BTNode>();
     node->execute();
-    // ros ok 이거나 behavior tree의 root node가 running 상태일 때까지 노드를 spin
+
     while (rclcpp::ok() && node->tree_.tickOnce() == BT::NodeStatus::RUNNING)
     {
         rclcpp::spin_some(node);
     }
+
     RCLCPP_INFO(node->get_logger(), "Shutting down.");
     rclcpp::shutdown();
     return 0;
