@@ -1,84 +1,78 @@
 # BT_Sample PKG
 
 ![1](./fig/1.png)
-## Behavior Tree Setting
 
-### Groot 2 Install
+## Table of Contents
+- [BT\_Sample PKG](#bt_sample-pkg)
+  - [Table of Contents](#table-of-contents)
+  - [Behavior Tree Setup](#behavior-tree-setup)
+    - [Install Groot 2](#install-groot-2)
+    - [Launch Groot 2](#launch-groot-2)
+    - [Install BehaviorTree.CPP (Optional)](#install-behaviortreecpp-optional)
+  - [Build Behavior Tree Sample PKG](#build-behavior-tree-sample-pkg)
+  - [Run Behavior Tree Sample PKG](#run-behavior-tree-sample-pkg)
+    - [Groot2 Launch](#groot2-launch)
+    - [Behavior Tree Sample PKG Launch](#behavior-tree-sample-pkg-launch)
 
-> `.run` 파일을 설치 후 권한을 부여 후 실행
-> 
+## Behavior Tree Setup
 
-[groot install link](https://s3.us-west-1.amazonaws.com/download.behaviortree.dev/groot2_linux_installer/Groot2-v1.5.2-linux-installer.run)
+### Install Groot 2
+
+`.run` 파일을 설치 후 권한을 부여 후 실행
 
 ```bash
-cd ~/Downloads
-sudo chmod 777 Groot2-v1.5.2-linux-installer.run 
+wget https://s3.us-west-1.amazonaws.com/download.behaviortree.dev/groot2_linux_installer/Groot2-v1.5.2-linux-installer.run
+chmod +x Groot2-v1.5.2-linux-installer.run 
 ./Groot2-v1.5.2-linux-installer.run
 ```
 
-### Groot 2 Launch
-
+### Launch Groot 2
 
 ```bash
-cd ~/Groot2/bin ; ./groot2
+cd ~/Groot2/bin
+./groot2
 ```
 
-> 다음 명령어를 통해 groot 로 단축키를 만들어 사용할 수 있습니다.
-> 
+> 다음 명령어를 통해 groot 로 단축키를 만들어 사용할 수 있습니다. 
 
 ```bash
 echo "alias groot='cd ~/Groot2/bin ; ./groot2'" >> ~/.bashrc
 ```
 
-### Behavior Tree Install & Build ( Version 4.5 )
+### Install BehaviorTree.CPP (Optional)
 
-
-> Behavior Tree Install
-> 
+전역적으로 사용할 수 있도록 설치합니다.
 
 ```bash
 cd ~/ros2_ws/src
 git clone https://github.com/BehaviorTree/BehaviorTree.CPP
-```
-
-> Behavior Tree build
-> 
-
-```bash
 sudo apt install libzmq3-dev libboost-dev qtbase5-dev libqt5svg5-dev libzmq3-dev libdw-dev
 cd ~/ros2_ws/src/BehaviorTree.CPP
-mkdir build; cd build
+mkdir build && cd build
 cmake ..
-make -j8
-sudo make install
+sudo make -j8 install
 ```
 
-> 경로 지정
-> 
-
-```bash
-echo "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> ~/.bashrc
-```
-
-### Install Behavior Tree Sample PKG
+## Build Behavior Tree Sample PKG
 
 ```bash
 cd ~/ros2_ws/src
-git clone https://github.com/AuTURBO/bt_tamplate.git
-cd ~/ros2_ws 
+git clone https://github.com/AuTURBO/bt_template.git
+cd ~/ros2_ws
 colcon build
 ```
 
-## BehaviorTree Sample PKG Launch
+## Run Behavior Tree Sample PKG
 
 ### Groot2 Launch
 
 ```bash
-groot2
+~/Groot2/bin/groot2
 ```
 
 ### Behavior Tree Sample PKG Launch
 
 ```bash
+source ~/ros2_ws/install/local_setup.bash
 ros2 run bt_sample bt_node
 ```
