@@ -58,7 +58,7 @@ sudo make -j8 install
 ```bash
 cd ~/ros2_ws/src
 git clone https://github.com/AuTURBO/bt_template.git
-cd ~/ros2_ws
+cd ~/ros2_ws 
 colcon build
 ```
 
