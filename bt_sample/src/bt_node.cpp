@@ -37,7 +37,7 @@ int main(int argc, char **argv)
 
     auto factory = BT::BehaviorTreeFactory();
     factory.registerNodeType<TopicDetected>("TopicDetected", ros2_node);
-    factory.registerNodeType<TopicPubConditionNode>("TopicPubConditionNode", ros2_node, 2s);
+    factory.registerNodeType<TopicPubConditionNode<std_msgs::msg::Int32>>("TopicPubConditionNode", ros2_node, "/topic" 2s);
     factory.registerNodeType<TopicDetectedSyncAction>("TopicDetectedSyncAction", ros2_node);
 
     const auto default_bt_xml_file = ament_index_cpp::get_package_share_directory("bt_sample") + "/config/main_bt.xml";
@@ -50,7 +50,7 @@ int main(int argc, char **argv)
     auto bt_file_logger = std::make_unique<BT::FileLogger2>(tree, default_bt_log_file);
     auto bt_cout_logger = std::make_unique<BT::StdCoutLogger>(tree);
 
-    auto bt_executer = std::thread([&]() {
+    auto bt_executer = std::thread([&tree]() {
         tree.tickWhileRunning();
         rclcpp::shutdown();
     });

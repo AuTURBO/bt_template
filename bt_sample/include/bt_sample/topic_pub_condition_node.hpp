@@ -32,17 +32,18 @@ using std::placeholders::_1;
 // statful action에서 실행이 되는 동안 로봇의 상태를 확인하고, 이에 따라 다른 노드를 실행하거나 중지하는 노드를 구현하면
 // 된다.
 
+template <typename TopicMsgType>
 class TopicPubConditionNode : public BT::ConditionNode
 {
 public:
     // 생성자: Behavior Tree 노드와 ROS 2 노드를 초기화
     TopicPubConditionNode(const std::string &name, const BT::NodeConfiguration &config, rclcpp::Node::SharedPtr node,
-                          std::chrono::milliseconds timeout = 1000ms)
+                          const std::string &topic_name, std::chrono::milliseconds timeout = 1000ms)
         : BT::ConditionNode(name, config)
         , node_(node)
         , timeout_(timeout)
     {
-        this->setPreTickFunction(std::bind(&TopicPubConditionNode::CreateSubscription, this));
+        this->setPreTickFunction(std::bind(&TopicPubConditionNode::CreateSubscription, this, topic_name));
         this->setPostTickFunction(std::bind(&TopicPubConditionNode::DestroySubscription, this));
     }
 
@@ -72,11 +73,11 @@ public:
     }
 
 private:
-    BT::NodeStatus CreateSubscription(void)
+    BT::NodeStatus CreateSubscription(const std::string &topic_name)
     {
         promise_ = std::promise<void>();
         future_ = promise_.get_future();
-        sub_ = node_->create_subscription<std_msgs::msg::Int32>("/topic", 10, [this](std_msgs::msg::Int32::SharedPtr msg) {
+        sub_ = node_->create_subscription<TopicMsgType>(topic_name, 10, [this](std::shared_ptr<TopicMsgType> msg) {
             RCLCPP_INFO(node_->get_logger(), "Received: %d", msg->data);
             promise_.set_value();
         });
@@ -88,7 +89,7 @@ private:
     }
 
     rclcpp::Node::SharedPtr node_;
-    rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr sub_;
+    std::shared_ptr<rclcpp::Subscription<TopicMsgType>> sub_;
     std::chrono::milliseconds timeout_;
     std::promise<void> promise_;
     std::future<void> future_;
