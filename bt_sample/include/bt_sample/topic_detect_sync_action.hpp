@@ -1,3 +1,5 @@
+#pragma once
+
 #include "std_msgs/msg/int32.hpp"
 #include <rclcpp/executors.hpp>
 #include <rclcpp/rclcpp.hpp>

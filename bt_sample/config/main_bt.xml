@@ -2,15 +2,18 @@
 <root BTCPP_format="4">
     <BehaviorTree ID="Untitled">
         <Sequence>
-            <TopicPubConditionNode message="hello"/>
-            <TopicPubConditionNode message="hello"/>
-            <TopicPubConditionNode message="hello"/>
+            <SimplePubCondition message="hello"/>
+            <SimplePubCondition message="hello"/>
+            <PositiveIntPubCondition message="hello"/>
         </Sequence>
     </BehaviorTree>
 
     <!-- Description of Node Models (used by Groot) -->
     <TreeNodesModel>
-        <Action ID="TopicPubConditionNode" editable="true">
+        <Action ID="SimplePubCondition" editable="true">
+            <input_port name="message"/>
+        </Action>
+        <Action ID="PositiveIntPubCondition" editable="true">
             <input_port name="message"/>
         </Action>
     </TreeNodesModel>

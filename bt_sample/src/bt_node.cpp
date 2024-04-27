@@ -7,6 +7,7 @@
 // ROS2 headers
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/int32.hpp>
 
 // BehaviorTree.CPP headers
 #include <behaviortree_cpp/loggers/bt_cout_logger.h>
@@ -15,6 +16,7 @@
 #include <behaviortree_cpp/xml_parsing.h>
 
 // Project headers
+#include "bt_sample/positive_int_pub_condition.hpp"
 #include "bt_sample/topic_detect_stateful_action.hpp"
 #include "bt_sample/topic_detect_sync_action.hpp"
 #include "bt_sample/topic_pub_condition_node.hpp"
@@ -36,9 +38,10 @@ int main(int argc, char **argv)
     auto ros2_node = std::make_shared<ROS2Node>("bt_node");
 
     auto factory = BT::BehaviorTreeFactory();
-    factory.registerNodeType<TopicDetected>("TopicDetected", ros2_node);
-    factory.registerNodeType<TopicPubConditionNode<std_msgs::msg::Int32>>("TopicPubConditionNode", ros2_node, "/topic" 2s);
-    factory.registerNodeType<TopicDetectedSyncAction>("TopicDetectedSyncAction", ros2_node);
+    factory.registerNodeType<SimplePubCondition<std_msgs::msg::Int32>>("SimplePubCondition", ros2_node, "/topic", 2s);
+    factory.registerNodeType<PositiveIntPubCondition>("PositiveIntPubCondition", ros2_node, "/topic", 2s);
+    // factory.registerNodeType<TopicDetected>("TopicDetected", ros2_node);
+    // factory.registerNodeType<TopicDetectedSyncAction>("TopicDetectedSyncAction", ros2_node);
 
     const auto default_bt_xml_file = ament_index_cpp::get_package_share_directory("bt_sample") + "/config/main_bt.xml";
     const auto default_bt_log_file = ament_index_cpp::get_package_share_directory("bt_sample") + "/log/bt_trace.btlog";

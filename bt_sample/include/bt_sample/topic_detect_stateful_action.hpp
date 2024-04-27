@@ -1,3 +1,5 @@
+#pragma once
+
 // Standard headers
 #include <chrono>
 #include <cmath>
