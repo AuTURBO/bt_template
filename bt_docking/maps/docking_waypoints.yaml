@@ -1,0 +1,5 @@
+# Defines object locations as [x, y, theta]
+location1: [-1.5, -0.0, -2.25] # 대차의 예상 위치
+location2: [0.5, 2.0, 0.785]   # 대차의 최종 운반될 위치
+# location3: [4.0, 0.5, 1.571]
+# location4: [2.75, 2.5, -1.571]
