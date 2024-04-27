@@ -1,22 +1,22 @@
-// Standard headers
+#include "std_msgs/msg/int32.hpp"
+#include <rclcpp/executors.hpp>
+#include <rclcpp/rclcpp.hpp>
+
+#include <behaviortree_cpp/basic_types.h>
+#include <behaviortree_cpp/bt_factory.h>
+#include <behaviortree_cpp/tree_node.h>
+
 #include <chrono>
 #include <cmath>
 #include <iostream>
 #include <memory>
 #include <string>
 
-// ROS2 headers
-#include <rclcpp/executors.hpp>
-#include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/int32.hpp>
-
-// BehaviorTree.CPP headers
-#include <behaviortree_cpp/basic_types.h>
-#include <behaviortree_cpp/bt_factory.h>
-#include <behaviortree_cpp/tree_node.h>
-
 using namespace std::chrono_literals;
+using std::chrono::milliseconds;
 using std::placeholders::_1;
+
+using namespace BT;
 
 // BehaviorTree.CPP에서 사용되는 네임스페이스와 타입 정의
 
@@ -27,9 +27,11 @@ using std::placeholders::_1;
 // ROS2의 토픽 메시지를 구독하는 노드를 구현할 때 사용된다.
 // 즉, 특정 토픽 메시지를 구독하고, 이에 따라 다른 노드를 실행하거나 중지하는 노드를 구현할 때 사용된다.
 
-class TopicDetected : public BT::SyncActionNode, public rclcpp::Node
+class TopicDetectedSyncAction : public BT::SyncActionNode
 {
-private:
+  private:
+    // ROS 2 노드 객체
+    rclcpp::Node::SharedPtr node_ptr_;
     //   ROS 2 구독자 및 발행자 객체
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr subscription_;
     rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr publisher_;
@@ -48,51 +50,39 @@ private:
         detected = true;          // 메시지가 감지되었음을 표시
     }
 
-public:
+  public:
     // 생성자: Behavior Tree 노드와 ROS 2 노드를 초기화
-    TopicDetected(const std::string &name, const BT::NodeConfiguration &config)
-        : BT::SyncActionNode(name, config)
-        , Node("topic_detected_node3")
+    TopicDetectedSyncAction(const std::string &name, const NodeConfiguration &config, rclcpp::Node::SharedPtr node_ptr)
+        : BT::SyncActionNode(name, config), node_ptr_{node_ptr}
     {
         // ROS 2 구독자 및 발행자 초기화
-        // std::string msg;
-        // getInput<std::string>("message", msg);
-        // RCLCPP_ERROR(this->get_logger(), "message: ", msg);
-        subscription_ = this->create_subscription<std_msgs::msg::Int32>("/toto", 10,
-                                                                        std::bind(&TopicDetected::topic_callback, this, _1));
-        publisher_ = this->create_publisher<std_msgs::msg::Int32>("/topic/detected", 10);
+        subscription_ = node_ptr_->create_subscription<std_msgs::msg::Int32>(
+            "/topic", 10, std::bind(&TopicDetectedSyncAction::topic_callback, this, _1));
+        publisher_ = node_ptr_->create_publisher<std_msgs::msg::Int32>("/topic/detected", 10);
     }
 
     // Behavior Tree 노드의 실행 함수
-    BT::NodeStatus tick() override
+    NodeStatus tick() override
     {
-        // 메시지가 감지되었는지 여부에 따라 Behavior Tree의 실행 결과를 반환
-        rclcpp::spin_some(this->get_node_base_interface());
-        std::string msg;
-        if (!getInput<std::string>("message", msg))
+        if (!node_ptr_)
         {
-            // 'message' 입력 포트에서 값을 가져오는 데 실패한 경우
-            RCLCPP_ERROR(this->get_logger(), "Missing required input [message]: ", msg);
-        }
-
-        else
-        {
-            RCLCPP_INFO(this->get_logger(), "Received message: ", msg);
-        }
-
-        if (detected == false)
-        {
+            // std::cout << "ROS2 node not registered via init() method" << std::endl;
+            RCLCPP_ERROR(node_ptr_->get_logger(), "ROS2 node not registered via init() method");
             return BT::NodeStatus::FAILURE;
         }
+        if (detected == false)
+        {
+            return NodeStatus::FAILURE;
+        }
         else
         {
-            return BT::NodeStatus::SUCCESS;
+            return NodeStatus::SUCCESS;
         }
     }
 
     // Behavior Tree 노드에서 사용할 수 있는 포트 목록을 제공
-    static BT::PortsList providedPorts()
+    static PortsList providedPorts()
     {
-        return { BT::InputPort<std::string>("message") }; // 이 예제에서는 string 타입의 입력 포트를 제공
+        return {InputPort<std::string>("message")}; // 이 예제에서는 string 타입의 입력 포트를 제공
     }
 };
