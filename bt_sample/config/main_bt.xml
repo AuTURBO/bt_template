@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4">
-  <BehaviorTree ID="Untitled">
-    <Sequence>
-      <TopicDetected message="hello"/>
-      <TopicDetected message="hello"/>
-      <TopicDetected message="hello"/>
-      <TopicDetected message="hello"/>
-      <TopicDetected message="hello"/>
-    </Sequence>
-  </BehaviorTree>
+    <BehaviorTree ID="Untitled">
+        <Sequence>
+            <TopicPubConditionNode message="hello"/>
+            <TopicPubConditionNode message="hello"/>
+            <TopicPubConditionNode message="hello"/>
+        </Sequence>
+    </BehaviorTree>
 
-  <!-- Description of Node Models (used by Groot) -->
-  <TreeNodesModel>
-    <Action ID="TopicDetected"
-            editable="true">
-      <input_port name="message"/>
-    </Action>
-  </TreeNodesModel>
+    <!-- Description of Node Models (used by Groot) -->
+    <TreeNodesModel>
+        <Action ID="TopicPubConditionNode" editable="true">
+            <input_port name="message"/>
+        </Action>
+    </TreeNodesModel>
 
 </root>

@@ -16,7 +16,8 @@
 
 // Project headers
 #include "bt_sample/topic_detect_stateful_action.hpp"
-// #include "bt_sample/topic_detect_sync_action.hpp"
+#include "bt_sample/topic_detect_sync_action.hpp"
+#include "bt_sample/topic_pub_condition_node.hpp"
 
 using namespace std::chrono_literals;
 
@@ -43,8 +44,9 @@ public:
     {
         create_behavior_tree();
 
-        const auto timer_period = 500ms;
-        timer_ = this->create_wall_timer(timer_period, std::bind(&BTNode::update_behavior_tree, this));
+        // const auto timer_period = 500ms;
+        // timer_ = this->create_wall_timer(timer_period, std::bind(&BTNode::update_behavior_tree, this));
+        bt_thread_ = std::thread([this]() { tree_.tickWhileRunning(); });
         RCLCPP_INFO(this->get_logger(), "Behavior Tree is running...");
     }
 
@@ -52,6 +54,8 @@ public:
     {
         BT::BehaviorTreeFactory factory;
         factory.registerNodeType<TopicDetected>("TopicDetected", shared_from_this());
+        factory.registerNodeType<TopicPubConditionNode>("TopicPubConditionNode", shared_from_this());
+        factory.registerNodeType<TopicDetectedSyncAction>("TopicDetectedSyncAction", shared_from_this());
 
         auto blackboard = BT::Blackboard::create();
         tree_ = factory.createTreeFromFile(tree_xml_file_, blackboard);
@@ -81,6 +85,7 @@ public:
     // ROS and BehaviorTree.CPP variables.
     rclcpp::TimerBase::SharedPtr timer_;
     BT::Tree tree_;
+    std::thread bt_thread_;
     std::unique_ptr<BT::Groot2Publisher> publisher_ptr_;
     std::unique_ptr<BT::FileLogger2> logger_file_;
     std::unique_ptr<BT::StdCoutLogger> logger_cout_;
@@ -93,7 +98,7 @@ int main(int argc, char **argv)
     auto node = std::make_shared<BTNode>();
     node->execute();
 
-    while (rclcpp::ok() && node->tree_.tickOnce() == BT::NodeStatus::RUNNING)
+    while (rclcpp::ok())
     {
         rclcpp::spin_some(node);
     }
