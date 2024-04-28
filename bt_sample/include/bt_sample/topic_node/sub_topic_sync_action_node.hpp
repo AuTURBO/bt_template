@@ -29,9 +29,9 @@ using namespace BT;
 // ROS2의 토픽 메시지를 구독하는 노드를 구현할 때 사용된다.
 // 즉, 특정 토픽 메시지를 구독하고, 이에 따라 다른 노드를 실행하거나 중지하는 노드를 구현할 때 사용된다.
 
-class TopicDetectedSyncAction : public BT::SyncActionNode
+class SubTopicSyncActionNode : public BT::SyncActionNode
 {
-  private:
+private:
     // ROS 2 노드 객체
     rclcpp::Node::SharedPtr node_ptr_;
     //   ROS 2 구독자 및 발행자 객체
@@ -52,14 +52,15 @@ class TopicDetectedSyncAction : public BT::SyncActionNode
         detected = true;          // 메시지가 감지되었음을 표시
     }
 
-  public:
+public:
     // 생성자: Behavior Tree 노드와 ROS 2 노드를 초기화
-    TopicDetectedSyncAction(const std::string &name, const NodeConfiguration &config, rclcpp::Node::SharedPtr node_ptr)
-        : BT::SyncActionNode(name, config), node_ptr_{node_ptr}
+    SubTopicSyncActionNode(const std::string &name, const NodeConfiguration &config, rclcpp::Node::SharedPtr node_ptr)
+        : BT::SyncActionNode(name, config)
+        , node_ptr_{ node_ptr }
     {
         // ROS 2 구독자 및 발행자 초기화
         subscription_ = node_ptr_->create_subscription<std_msgs::msg::Int32>(
-            "/topic", 10, std::bind(&TopicDetectedSyncAction::topic_callback, this, _1));
+            "/topic", 10, std::bind(&SubTopicSyncActionNode::topic_callback, this, _1));
         publisher_ = node_ptr_->create_publisher<std_msgs::msg::Int32>("/topic/detected", 10);
     }
 
@@ -85,6 +86,6 @@ class TopicDetectedSyncAction : public BT::SyncActionNode
     // Behavior Tree 노드에서 사용할 수 있는 포트 목록을 제공
     static PortsList providedPorts()
     {
-        return {InputPort<std::string>("message")}; // 이 예제에서는 string 타입의 입력 포트를 제공
+        return { InputPort<std::string>("message") }; // 이 예제에서는 string 타입의 입력 포트를 제공
     }
 };

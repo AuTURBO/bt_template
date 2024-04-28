@@ -16,10 +16,11 @@
 #include <behaviortree_cpp/xml_parsing.h>
 
 // Project headers
-#include "bt_sample/positive_int_pub_condition.hpp"
-#include "bt_sample/topic_detect_stateful_action.hpp"
-#include "bt_sample/topic_detect_sync_action.hpp"
-#include "bt_sample/topic_pub_condition_node.hpp"
+#include "bt_sample/my_topic_condition.hpp"
+#include "bt_sample/topic_node/general_topic_condition_node.hpp"
+#include "bt_sample/topic_node/sub_topic_async_action_node.hpp"
+#include "bt_sample/topic_node/sub_topic_condition_node.hpp"
+#include "bt_sample/topic_node/sub_topic_sync_action_node.hpp"
 
 using namespace std::chrono_literals;
 
@@ -38,10 +39,11 @@ int main(int argc, char **argv)
     auto ros2_node = std::make_shared<ROS2Node>("bt_node");
 
     auto factory = BT::BehaviorTreeFactory();
-    factory.registerNodeType<SimplePubCondition<std_msgs::msg::Int32>>("SimplePubCondition", ros2_node, "/topic", 2s);
-    factory.registerNodeType<PositiveIntPubCondition>("PositiveIntPubCondition", ros2_node, "/topic", 2s);
-    // factory.registerNodeType<TopicDetected>("TopicDetected", ros2_node);
-    // factory.registerNodeType<TopicDetectedSyncAction>("TopicDetectedSyncAction", ros2_node);
+    factory.registerNodeType<IsTopicPositive>("IsTopicPositive", ros2_node);
+    factory.registerNodeType<IsTopicBiggerThan10>("IsTopicBiggerThan10", ros2_node);
+    // factory.registerNodeType<SimpleSubTopicCondition<std_msgs::msg::Int32>>("SimpleSubTopic", ros2_node, "/topic", 2s);
+    // factory.registerNodeType<SubTopicAsyncActionNode>("SubTopicAsyncActionNode", ros2_node);
+    // factory.registerNodeType<SubTopicSyncActionNode>("SubTopicSyncActionNode", ros2_node);
 
     const auto default_bt_xml_file = ament_index_cpp::get_package_share_directory("bt_sample") + "/config/main_bt.xml";
     const auto default_bt_log_file = ament_index_cpp::get_package_share_directory("bt_sample") + "/log/bt_trace.btlog";
@@ -53,14 +55,17 @@ int main(int argc, char **argv)
     auto bt_file_logger = std::make_unique<BT::FileLogger2>(tree, default_bt_log_file);
     auto bt_cout_logger = std::make_unique<BT::StdCoutLogger>(tree);
 
-    auto bt_executer = std::thread([&tree]() {
-        tree.tickWhileRunning();
-        rclcpp::shutdown();
-    });
+    while (rclcpp::ok())
+    {
+        const auto &now = std::chrono::steady_clock::now();
 
-    rclcpp::spin(ros2_node);
-    bt_executer.join();
+        rclcpp::spin_some(ros2_node);
+        tree.tickOnce();
 
+        std::this_thread::sleep_until(now + 100ms);
+    }
+
+    rclcpp::shutdown();
     RCLCPP_INFO(ros2_node->get_logger(), "Shutting down.");
     return 0;
 }

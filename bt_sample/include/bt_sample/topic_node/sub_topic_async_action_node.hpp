@@ -34,41 +34,16 @@ using std::placeholders::_1;
 // 비동기적 구현이 가능하여, 로봇이 동작하는 동안 로봇의 상태를 체크하고, 이에 따라 다른 노드를 실행하거나 중지하는
 // 노드를 구현할 때 사용될 수 있다.
 
-class TopicDetected : public BT::StatefulActionNode //, public rclcpp::Node
+class SubTopicAsyncActionNode : public BT::StatefulActionNode
 {
-private:
-    // ROS 2 노드 객체
-    rclcpp::Node::SharedPtr node_ptr_;
-    // ROS 2 구독자 및 발행자 객체
-    rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr subscription_;
-    rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr publisher_;
-
-    // 메시지가 감지되었는지 여부를 나타내는 플래그
-    bool detected = false;
-    bool flag = false;
-    // ROS 2 토픽 메시지 콜백 함수
-    void topic_callback(const std_msgs::msg::Int32::SharedPtr _msg)
-    {
-        // 받은 메시지를 바탕으로 로직 처리
-        std_msgs::msg::Int32 tmp;
-        tmp.data = _msg->data;    // 받은 데이터를 임시 메시지에 저장
-        publisher_->publish(tmp); // 임시 메시지를 발행
-        // detected = true;          // 메시지가 감지되었음을 표시
-        if (flag == true)
-        {
-            detected = true;
-            flag = false;
-        }
-    }
-
 public:
     // 생성자: Behavior Tree 노드와 ROS 2 노드를 초기화
-    TopicDetected(const std::string &name, const BT::NodeConfiguration &config, rclcpp::Node::SharedPtr node_ptr)
+    SubTopicAsyncActionNode(const std::string &name, const BT::NodeConfiguration &config, rclcpp::Node::SharedPtr node_ptr)
         : BT::StatefulActionNode(name, config)
         , node_ptr_{ node_ptr }
     {
         subscription_ = node_ptr_->create_subscription<std_msgs::msg::Int32>(
-            "/topic", 10, std::bind(&TopicDetected::topic_callback, this, _1));
+            "/topic", 10, std::bind(&SubTopicAsyncActionNode::topic_callback, this, _1));
         publisher_ = node_ptr_->create_publisher<std_msgs::msg::Int32>("/camera/detected", 10);
     }
 
@@ -111,7 +86,32 @@ public:
     // Behavior Tree 노드에서 사용할 수 있는 포트 목록을 제공
     static BT::PortsList providedPorts()
     {
-        const char *description = "Simply print the target on console...";
         return { BT::InputPort<std::string>("message") }; // 이 예제에서는 string 타입의 입력 포트를 제공
     }
+
+private:
+    // ROS 2 토픽 메시지 콜백 함수
+    void topic_callback(const std_msgs::msg::Int32::SharedPtr _msg)
+    {
+        // 받은 메시지를 바탕으로 로직 처리
+        std_msgs::msg::Int32 tmp;
+        tmp.data = _msg->data;    // 받은 데이터를 임시 메시지에 저장
+        publisher_->publish(tmp); // 임시 메시지를 발행
+        // detected = true;          // 메시지가 감지되었음을 표시
+        if (flag == true)
+        {
+            detected = true;
+            flag = false;
+        }
+    }
+
+    // ROS 2 노드 객체
+    rclcpp::Node::SharedPtr node_ptr_;
+    // ROS 2 구독자 및 발행자 객체
+    rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr subscription_;
+    rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr publisher_;
+
+    // 메시지가 감지되었는지 여부를 나타내는 플래그
+    bool detected = false;
+    bool flag = false;
 };

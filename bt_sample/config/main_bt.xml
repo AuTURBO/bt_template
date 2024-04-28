@@ -1,21 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4">
     <BehaviorTree ID="Untitled">
-        <Sequence>
-            <SimplePubCondition message="hello"/>
-            <SimplePubCondition message="hello"/>
-            <PositiveIntPubCondition message="hello"/>
-        </Sequence>
+        <KeepRunningUntilFailure>
+            <Sequence>
+                <Sequence>
+                    <IsTopicPositive message="hello"/>
+                    <Sleep msec="1000"/>
+                </Sequence>
+                <Sequence>
+                    <IsTopicBiggerThan10 message="hello"/>
+                    <Sleep msec="1000"/>
+                </Sequence>
+            </Sequence>
+        </KeepRunningUntilFailure>
     </BehaviorTree>
 
     <!-- Description of Node Models (used by Groot) -->
     <TreeNodesModel>
-        <Action ID="SimplePubCondition" editable="true">
+        <Action ID="IsTopicPositive" editable="true">
             <input_port name="message"/>
         </Action>
-        <Action ID="PositiveIntPubCondition" editable="true">
+        <Action ID="IsTopicBiggerThan10" editable="true">
             <input_port name="message"/>
+        </Action>
+        <Action ID="Sleep" editable="true">
+            <input_port name="msec"/>
         </Action>
     </TreeNodesModel>
-
 </root>
