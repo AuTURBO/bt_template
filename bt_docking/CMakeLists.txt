@@ -14,7 +14,7 @@ find_package(rclcpp_action REQUIRED )
 find_package(behaviortree_cpp REQUIRED )
 find_package(std_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
-find_package(laser_line_extraction REQUIRED)
+# find_package(laser_line_extraction REQUIRED)
 find_package(ament_cmake_auto REQUIRED)
 
 find_package(ament_index_cpp REQUIRED)
@@ -67,7 +67,7 @@ set(AUTONOMY_SOURCES
 
 add_executable(bt_docking src/bt_docking.cpp ${AUTONOMY_SOURCES})
 ament_target_dependencies(bt_docking
-  laser_line_extraction
+  # laser_line_extraction
   ${dependencies}
 )
 target_link_libraries(bt_docking yaml-cpp)
