@@ -1,78 +1,34 @@
-# BT_Sample PKG
+![./fig/BT_NAV2_groot.png](./fig/BT_NAV2_groot.png)
 
-![1](./fig/1.png)
+# Behavior Tree Setup
 
-## Table of Contents
-- [BT\_Sample PKG](#bt_sample-pkg)
-  - [Table of Contents](#table-of-contents)
-  - [Behavior Tree Setup](#behavior-tree-setup)
-    - [Install Groot 2](#install-groot-2)
-    - [Launch Groot 2](#launch-groot-2)
-    - [Install BehaviorTree.CPP (Optional)](#install-behaviortreecpp-optional)
-  - [Build Behavior Tree Sample PKG](#build-behavior-tree-sample-pkg)
-  - [Run Behavior Tree Sample PKG](#run-behavior-tree-sample-pkg)
-    - [Groot2 Launch](#groot2-launch)
-    - [Behavior Tree Sample PKG Launch](#behavior-tree-sample-pkg-launch)
+## Build Behavior Tree BT_NAV2 PKG
 
-## Behavior Tree Setup
+- cd ~/ros2_ws/src
+- git clone -b bt_nav2 https://github.com/AuTURBO/bt_template.git
+- cd ~/ros2_ws
+- colcon build
 
-### Install Groot 2
-
-`.run` 파일을 설치 후 권한을 부여 후 실행
-
-```bash
-wget https://s3.us-west-1.amazonaws.com/download.behaviortree.dev/groot2_linux_installer/Groot2-v1.5.2-linux-installer.run
-chmod +x Groot2-v1.5.2-linux-installer.run 
-./Groot2-v1.5.2-linux-installer.run
-```
-
-### Launch Groot 2
-
-```bash
-cd ~/Groot2/bin
-./groot2
-```
-
-> 다음 명령어를 통해 groot 로 단축키를 만들어 사용할 수 있습니다. 
-
-```bash
-echo "alias groot='cd ~/Groot2/bin ; ./groot2'" >> ~/.bashrc
-```
-
-### Install BehaviorTree.CPP (Optional)
-
-전역적으로 사용할 수 있도록 설치합니다.
-
-```bash
-cd ~/ros2_ws/src
-git clone https://github.com/BehaviorTree/BehaviorTree.CPP
-sudo apt install libzmq3-dev libboost-dev qtbase5-dev libqt5svg5-dev libzmq3-dev libdw-dev
-cd ~/ros2_ws/src/BehaviorTree.CPP
-mkdir build && cd build
-cmake ..
-sudo make -j8 install
-```
-
-## Build Behavior Tree Sample PKG
-
-```bash
-cd ~/ros2_ws/src
-git clone https://github.com/AuTURBO/bt_template.git
-cd ~/ros2_ws 
-colcon build
-```
-
-## Run Behavior Tree Sample PKG
+## Run Behavior Tree BT_NAV2 PKG
 
 ### Groot2 Launch
 
-```bash
-~/Groot2/bin/groot2
-```
+- ~/Groot2/bin/groot2
 
-### Behavior Tree Sample PKG Launch
+### Behavior Tree BT_NAV2 PKG RUN
 
-```bash
-source ~/ros2_ws/install/local_setup.bash
-ros2 run bt_sample bt_node
-```
+`TERMINAL 1 : TURTLEBOT3 WORLD 및 NAV2이 갖춰진 환경에서 실시`
+
+- source ~/ros2_ws/install/local_setup.bash
+- ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+- ros2 launch turtlebot3_navigation2 navigation2.launch.py
+
+`TERMINAL 2 : BT로 Waypoint 주행`
+
+- source ~/ros2_ws/install/local_setup.bash
+- ros2 run bt_nav2 bt_main
+
+`[선택] TERMINAL 3 : Nav2 Goal까지 남은거리 Feedback`
+
+- source ~/ros2_ws/install/local_setup.bash
+- ros2 run bt_nav2 bt_main
